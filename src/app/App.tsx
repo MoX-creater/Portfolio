@@ -57,27 +57,37 @@ The result: the checkout critical path is a Redis Lua call plus a queue publish 
     github: "https://github.com/MoX-creater/Flash-sale---concurrency", 
   },
   {
-    name: "Typing Speed Web App",
-    tagline: "Real-time typing test platform with live WPM and accuracy tracking",
-    stack: ["MongoDB", "Express", "React", "Node.js"],
-    problem:
-      "Needed a responsive typing test platform that computes WPM and accuracy in real time without introducing input lag, while persisting session and scoring data reliably.",
-    role:
-      "Architected and built the full stack — 5+ RESTful APIs for session management, scoring, and user data persistence, plus the React frontend.",
-    decisions: [
-      {
-        label: "Optimized rendering pipeline",
-        reason:
-          "Tuned React state updates and rendering to minimize input lag during continuous typing, keeping response latency under 150ms in local testing.",
-      },
-      {
-        label: "Concurrent session handling",
-        reason:
-          "Validated system performance under 50–100 concurrent sessions, ensuring consistent data sync and responsiveness across users.",
-      },
-    ],
-    github: "https://github.com/MoX-creater/Typing-Speed-Website", 
-  },
+  name: "Typing Speed Web App",
+  tagline: "Real-time multiplayer typing platform with live WPM tracking, AI-adaptive passages, and AI performance summaries",
+  stack: ["React", "Node.js", "Express", "Firebase/Firestore", "Google Gemini API", "Socket.io"],
+  problem:
+    "Needed a responsive typing platform supporting real-time multiplayer races without input lag, alongside AI-personalized passage generation and performance feedback based on per-user typing error data.",
+  role:
+    "Architected and built the full stack — RESTful APIs for session, scoring, and user data management; real-time multiplayer race rooms via Socket.io; and AI-powered features (adaptive passage generation, performance summaries) using Google Gemini.",
+  decisions: [
+    {
+      label: "Optimized rendering pipeline",
+      reason:
+        "Tuned React state updates and rendering to minimize input lag during continuous typing, keeping response latency under 150ms in local testing.",
+    },
+    {
+      label: "Real-time multiplayer architecture",
+      reason:
+        "Built Socket.io-based race rooms (create/join/leave) with client-side result handling matching the solo-test pattern, validated on a single server instance without requiring Redis/RabbitMQ scaling.",
+    },
+    {
+      label: "AI-personalized passage generation",
+      reason:
+        "Captured per-user typing error telemetry (error maps, WPM over time, accuracy by character class) and fed it to Gemini to generate adaptive-difficulty passages, plus AI-generated post-race and post-test performance summaries.",
+    },
+    {
+      label: "Production hardening for AI endpoints",
+      reason:
+        "Added passage caching/reuse, rate limiting, and edge-case handling for new users with no typing profile yet, before merging the feature branch to main.",
+    },
+  ],
+  github: "https://github.com/MoX-creater/Typing-Speed-Website",
+},
   {
     name: "P2P File Sharing App",
     tagline: "Peer-to-peer file transfer using direct browser-to-browser connections",
