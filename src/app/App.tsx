@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, type ReactNode } from "react";
 import { Github, Linkedin, Mail, FileText, ExternalLink, Menu, X, ArrowUpRight } from "lucide-react";
+import { CustomCursor } from "./components/ui/CustomCursor";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -941,6 +942,7 @@ export default function App() {
       id="top"
       style={{ fontFamily: "'DM Sans', sans-serif" }}
     >
+      <CustomCursor />
       <Nav scrolled={scrolled} prefersReducedMotion={prefersReducedMotion} />
 
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
