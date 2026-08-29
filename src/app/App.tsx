@@ -55,7 +55,7 @@ Second, successful reservations produce a lightweight message to a RabbitMQ exch
 Third, a consumer service reads from the queue, writes the finalized order to MySQL, and handles retries on failure. If the consumer is slow or restarts, messages queue up rather than being lost. Idempotency keys prevent double-processing on retry.
 
 The result: the checkout critical path is a Redis Lua call plus a queue publish — typically under 5ms end-to-end, with horizontal scalability bounded only by Redis throughput.`,
-    github: "https://github.com/MoX-creater/Flash-sale---concurrency", 
+    github: "https://github.com/MoX-creater/Flash-Sale-Concurrency-App", 
   },
   {
   name: "Typing Speed Web App",
