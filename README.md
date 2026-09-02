@@ -1,8 +1,10 @@
 # Portfolio Website
 
 A modern personal portfolio website built with React, TypeScript, Vite, and Tailwind-inspired styling. It highlights projects, skills, background, and contact information in a polished, developer-focused layout.
-#Link : https://portfolio1-7zp.pages.dev/
-## Features
+
+## Link : https://portfolio1-7zp.pages.dev/
+
+### Features
 
 - Responsive single-page portfolio layout
 - Project cards with expandable architecture details
