@@ -1,270 +1,138 @@
 # Portfolio Website with RAG Chatbot
 
-A modern portfolio website built with React and Vite, featuring a RAG (Retrieval-Augmented Generation) chatbot powered by Google Gemini and Firebase Firestore.
+A personal portfolio site built with React and Vite, featuring an embedded chatbot that answers questions about my background and projects. The chatbot is built on a retrieval-augmented generation (RAG) pipeline — grounding every response in a curated knowledge base rather than relying on free-form generation — with a custom evaluation harness to measure answer quality.
 
-## 🚀 Quick Start
+**Live site:** [portfolio1-7zp.pages.dev](https://portfolio1-7zp.pages.dev)
 
-### For the Main Website
-```bash
-npm install
-npm run dev
+---
+
+## Why This Exists
+
+Most portfolio sites just list projects. This one lets a recruiter or engineer ask direct questions about my experience and get answers grounded in real source material — the same kind of system (RAG pipeline + eval harness) I'm aiming to build professionally, applied to my own site as a working demo.
+
+## Architecture
+
+```
+knowledge-base/*.md
+      │  chunked by heading
+      ▼
+  Embeddings (Google Gemini API)
+      │
+      ▼
+  Firestore (vector store)
+      │
+      ▼
+User query ──► Query embedding ──► Similarity search ──► Retrieved chunks
+                                                                │
+                                                                ▼
+                                                      Gemini LLM (streamed)
+                                                                │
+                                                                ▼
+                                                   SSE response ──► React widget
 ```
 
-Open http://localhost:5173 in your browser.
+- **Retrieval:** query text is embedded and compared against stored chunk embeddings via cosine similarity; the top matches are returned with their source file, heading, and similarity score.
+- **Generation:** retrieved chunks are passed to the LLM as grounding context, with a system prompt that scopes answers strictly to that context and instructs the model to decline rather than guess when the knowledge base doesn't cover a question.
+- **Streaming:** responses are streamed to the client over Server-Sent Events, with retrieval sources emitted as a distinct event before the answer begins streaming.
 
-### For the RAG Chatbot
-
-**Complete setup guide:** `RAG_SETUP_GUIDE.md`
-
-```bash
-# 1. Install dependencies (if not already done)
-npm install
-
-# 2. Configure environment
-cp .env.example .env
-# Fill in your Google Gemini API key and Firebase config
-
-# 3. Ingest knowledge base
-npm run ingest
-
-# 4. Test queries
-npm run query
-
-# 5. Run chatbot backend (optional)
-npm run chatbot
-```
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 portfolio-website/
-├── src/                          # React frontend source
-│   ├── app/
-│   │   ├── components/          # UI components
-│   │   └── App.tsx              # Main app component
-│   └── ...
+├── src/                       # React frontend
+│   ├── components/            # UI components, including the chat widget
+│   └── App.tsx
 │
-├── knowledge-base/               # RAG chatbot knowledge base
-│   ├── about.md                 # Personal info, education, contact
-│   ├── skills.md                # Technical skills breakdown  
-│   ├── faq.md                   # Common recruiter questions
-│   └── projects/                # Project documentation
+├── api/                       # Express backend
+│   ├── server.js              # Entry point
+│   ├── chat.js                # /api/chat route, SSE streaming, disconnect handling
+│   ├── retrieve.js            # Query embedding + Firestore similarity search
+│   └── generate.js            # LLM generation, retry logic for transient errors
+│
+├── scripts/
+│   ├── ingest.js               # Knowledge base ingestion (chunk → embed → store)
+│   └── check-firestore.js      # Verifies collection state and embedding dimensions
+│
+├── knowledge-base/             # Source of truth for the chatbot
+│   ├── about.md
+│   ├── skills.md
+│   ├── faq.md
+│   └── projects/
 │       ├── flash-sale-engine.md
 │       ├── droplink.md
 │       └── typing-speed-app.md
 │
-├── scripts/                     # RAG chatbot scripts
-│   ├── ingest.js               # Knowledge base ingestion
-│   ├── query-kb.js             # Query/search functionality
-│   ├── chatbot-example.js      # Express backend example
-│   └── README.md               # Detailed documentation
+├── eval/
+│   ├── questions.json          # Test question set (factual, project-specific, out-of-scope)
+│   └── run-eval.js             # LLM-as-judge scoring: faithfulness, relevance, correct refusal
 │
-├── public/                      # Static assets
-│   └── resume.pdf
+├── docs/
+│   ├── architecture.md
+│   ├── api.md
+│   ├── firestore-schema.md
+│   ├── frontend-chat.md
+│   └── testing-checklist.md
 │
-├── .env.example                 # Environment template
-├── RAG_SETUP_GUIDE.md          # Quick setup guide (START HERE)
-├── RAG_ARCHITECTURE.md         # System architecture
-├── RAG_IMPLEMENTATION_SUMMARY.md # Complete overview
-├── FIRESTORE_SCHEMA.md         # Database schema
-├── TESTING_CHECKLIST.md        # Testing guide
-└── README.md                   # This file
+├── .env.example
+└── README.md
 ```
 
-## ✨ Website Features
+## Tech Stack
 
-- Responsive single-page portfolio layout
-- Project cards with expandable architecture details
-- Skills and experience sections
-- Resume download CTA
-- Social links and contact section
-- RAG-powered chatbot (optional)
+**Frontend:** React, Vite, deployed on Cloudflare Pages
+**Backend:** Node.js / Express, deployed on Render
+**Embeddings:** Google Gemini API (`gemini-embedding-001`, 768-dim)
+**Generation:** Google Gemini API (model configurable via `GENERATION_MODEL` — kept as an env var rather than hardcoded, since model availability shifts over time)
+**Vector store:** Firebase Firestore
+**Streaming:** Server-Sent Events (fetch + ReadableStream on the client, since the request needs a POST body)
 
-## 🤖 RAG Chatbot Features
+## Running Locally
 
-- **Semantic Search**: Vector similarity search using Google Gemini embeddings
-- **Knowledge Base**: Markdown-based documentation (easy to update)
-- **Idempotent**: Re-ingestion updates chunks without duplication
-- **Zero Cost**: Within free tier limits (Gemini + Firestore)
-- **Production Ready**: Error handling, logging, rate limiting built-in
+```bash
+npm install
+cp .env.example .env
+# fill in GOOGLE_API_KEY, Firebase config, GENERATION_MODEL
 
-## 📚 Documentation
-
-| Document | Purpose |
-|----------|---------|
-| **`RAG_SETUP_GUIDE.md`** | Quick setup instructions (5 minutes) |
-| **`scripts/README.md`** | Detailed documentation and best practices |
-| **`RAG_ARCHITECTURE.md`** | System architecture and data flow |
-| **`FIRESTORE_SCHEMA.md`** | Database schema and indexes |
-| **`TESTING_CHECKLIST.md`** | Comprehensive testing guide |
-| **`RAG_IMPLEMENTATION_SUMMARY.md`** | Complete overview |
-
-**Start with:** `RAG_SETUP_GUIDE.md`
-
-## 🛠️ Available Scripts
-
-### Website Scripts
-- `npm run dev` - Start Vite dev server
-- `npm run build` - Build for production
-
-### RAG Chatbot Scripts
-- `npm run ingest` - Ingest knowledge base into Firestore
-- `npm run query` - Test query functionality
-- `npm run chatbot` - Run Express backend example
-
-## 🔧 Technology Stack
-
-### Frontend
-- React 18
-- Vite 6
-- Tailwind CSS
-- Radix UI components
-- Lucide React icons
-- Framer Motion
-
-### RAG Chatbot
-- **Embeddings**: Google Gemini API (text-embedding-004)
-- **Storage**: Firebase Firestore
-- **Backend**: Node.js/Express
-- **LLM**: Google Gemini (gemini-2.0-flash-exp)
-- **Vector Search**: In-memory cosine similarity
-
-## 📊 RAG System Overview
-
-```
-Markdown Files → Chunking → Embeddings → Firestore
-                                              ↓
-User Question → Query Embedding → Vector Search → Context
-                                                      ↓
-                                              Gemini LLM → Answer
+npm run ingest        # chunk knowledge-base/, embed, store in Firestore
+npm run dev            # frontend, http://localhost:5173
+node api/server.js     # backend, http://localhost:3001
 ```
 
-**Performance:**
-- Ingestion: ~15-25 seconds for 50 chunks
-- Query: <300ms for retrieval + ~1s for AI response
-- Cost: $0/month (within free tiers)
-
-## 🎯 Quick Integration Example
-
-```javascript
-import { searchKnowledgeBase } from './scripts/query-kb.js';
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-// In your Express backend
-app.post('/api/chat', async (req, res) => {
-  const { question } = req.body;
-  
-  // 1. Find relevant context
-  const chunks = await searchKnowledgeBase(question, 3);
-  
-  // 2. Build context
-  const context = chunks
-    .map(c => `[${c.heading}]\n${c.content}`)
-    .join('\n\n');
-  
-  // 3. Generate response
-  const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
-  const result = await model.generateContent(
-    `Context:\n${context}\n\nQuestion: ${question}\n\nAnswer as Mohit:`
-  );
-  
-  res.json({ answer: result.response.text() });
-});
+Verify the knowledge base ingested correctly:
+```bash
+npm run check-firestore
 ```
 
-See `scripts/chatbot-example.js` for complete implementation.
+## Evaluation
 
-## 🔐 Environment Variables
+The `/eval` harness runs a fixed question set against the live pipeline and scores each response using an LLM-as-judge for:
 
-Required in `.env`:
+- **Faithfulness** — does the answer avoid stating anything not supported by the retrieved context?
+- **Relevance** — does it actually address what was asked?
+- **Correct refusal** — for out-of-scope questions, does it decline rather than hallucinate?
+- **Retrieval quality** — did the retrieved sources match what the question needed?
 
-```env
-# Google Gemini API
-GOOGLE_API_KEY=your_api_key_here
-
-# Firebase Configuration  
-FIREBASE_API_KEY=your_firebase_api_key
-FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_STORAGE_BUCKET=your_project.appspot.com
-FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-FIREBASE_APP_ID=your_app_id
+```bash
+npm run eval
 ```
 
-Get keys from:
-- [Google AI Studio](https://aistudio.google.com/app/apikey)
-- [Firebase Console](https://console.firebase.google.com/)
+This is the piece I'd point to first in an interview — it's the difference between "I called an LLM API" and "I built something I can measure the reliability of."
 
-## 📈 Scaling Considerations
+**Caveat worth naming honestly:** LLM-as-judge scoring is not ground truth — it inherits the biases and blind spots of whatever model is doing the judging. It's a useful signal for catching regressions and comparing prompt/retrieval changes, not a substitute for human review of edge cases.
 
-**Current setup works well for:**
-- ✅ Portfolio sites (<100 chunks)
-- ✅ Personal projects (<1000 chunks)
-- ✅ Rapid prototyping
-- ✅ Zero infrastructure complexity
+## Design Decisions & Trade-offs
 
-**Migrate to Pinecone/Vertex AI when:**
-- You exceed 1000 chunks
-- Query latency >500ms is unacceptable
-- You need advanced metadata filtering
+- **Firestore over a dedicated vector DB:** sufficient for a knowledge base this size (tens of chunks, not thousands), and avoids adding another service to operate. Worth revisiting if the knowledge base grows substantially or query latency becomes a bottleneck.
+- **Model name kept in an env var, not hardcoded:** Gemini model availability changes — building and deploying this project involved several rounds of models being deprecated mid-development. Making this configurable meant a redeploy could fix it without a code change.
+- **Explicit CORS allowlist, not wildcard:** this endpoint calls a metered LLM API, so open CORS would let any site embed and consume the quota.
+- **Per-IP rate limiting:** protects against abuse on a public, unauthenticated endpoint.
 
-See `FIRESTORE_SCHEMA.md` for migration guide.
+## Known Limitations
 
-## 🐛 Troubleshooting
+- Render's free tier spins down after inactivity — the first request after idle can take up to a minute to respond.
+- Retrieval and generation both depend on Gemini API availability and rate limits; the backend retries transient failures but does not fail over to a different provider.
 
-| Issue | Solution |
-|-------|----------|
-| "No markdown files found" | Check `/knowledge-base` directory exists |
-| "GOOGLE_API_KEY not set" | Create `.env` from `.env.example` |
-| "Permission denied" | Update Firestore rules in Firebase Console |
-| Query returns no results | Lower `minSimilarity` threshold to 0.3 |
-
-Complete troubleshooting guide: `scripts/README.md` → Troubleshooting
-
-## ✅ Testing
-
-Follow `TESTING_CHECKLIST.md` for comprehensive testing:
-
-1. Environment setup
-2. Knowledge base content
-3. Ingestion pipeline
-4. Firestore verification
-5. Query functionality
-6. Quality tests
-7. Idempotency
-8. Performance validation
-
-## 💰 Cost Breakdown
-
-| Service | Free Tier | Your Usage | Cost |
-|---------|-----------|------------|------|
-| Gemini Embeddings | 1M/month | ~100 | $0 |
-| Firestore Reads | 50K/day | ~100-1000 | $0 |
-| Firestore Writes | 20K/day | ~100 | $0 |
-| Firestore Storage | 1 GB | <1 MB | $0 |
-
-**Total: $0/month**
-
-## 📖 Learn More
-
-- [Google Gemini API Docs](https://ai.google.dev/docs)
-- [Firebase Firestore Docs](https://firebase.google.com/docs/firestore)
-- [RAG Best Practices](https://www.pinecone.io/learn/retrieval-augmented-generation/)
-- [Vector Embeddings Guide](https://www.pinecone.io/learn/vector-embeddings/)
-
-## 🤝 Support
-
-1. Check documentation (see table above)
-2. Review troubleshooting sections
-3. Test with provided examples
-4. Verify environment configuration
-
-## 📝 License
-
-ISC
-
-## 👤 Author
+## Author
 
 Mohit Kumar
 - Email: mohitk3001@gmail.com
