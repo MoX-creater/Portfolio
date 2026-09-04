@@ -38,7 +38,10 @@ interface Message {
 // Configuration
 // ============================================================================
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api/chat';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_URL = API_BASE_URL.replace(/\/$/, '').endsWith('/api/chat')
+  ? API_BASE_URL.replace(/\/$/, '')
+  : `${API_BASE_URL.replace(/\/$/, '')}/api/chat`;
 const MAX_QUERY_LENGTH = 500;
 const CHAR_WARNING_THRESHOLD = 450; // Show counter at 90%
 
