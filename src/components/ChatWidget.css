@@ -104,7 +104,11 @@
 .chat-messages {
   flex: 1;
   overflow-y: auto;
-  padding: 16px;
+  box-sizing: border-box;
+  padding: 16px 24px 16px 16px;
+  scrollbar-width: thin;
+  scrollbar-color: #0a0 #000;
+  scrollbar-gutter: stable;
   background: #000;
   color: #0f0;
   font-size: 13px;
@@ -113,7 +117,7 @@
 
 /* Custom scrollbar for terminal aesthetic */
 .chat-messages::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 .chat-messages::-webkit-scrollbar-track {
@@ -121,12 +125,12 @@
 }
 
 .chat-messages::-webkit-scrollbar-thumb {
-  background: #0f0;
+  background: #0a0;
   border: 1px solid #000;
 }
 
 .chat-messages::-webkit-scrollbar-thumb:hover {
-  background: #0c0;
+  background: #0f0;
 }
 
 .chat-empty {
