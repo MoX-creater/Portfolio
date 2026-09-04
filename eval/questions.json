@@ -1,0 +1,243 @@
+{
+  "version": 1,
+  "notes": "Gold labels are key facts from knowledge-base/*.md, not exact phrasing. expected_source filenames match Firestore kb_chunks.filename (relative to knowledge-base/). Out-of-scope items have empty expected_source and expected_behavior=decline.",
+  "questions": [
+    {
+      "id": "q01",
+      "category": "factual",
+      "expected_behavior": "answer",
+      "question": "What stack does the Flash Sale Engine use?",
+      "expected_key_facts": [
+        "Spring Boot",
+        "Redis",
+        "Redisson",
+        "RabbitMQ",
+        "PostgreSQL",
+        "Docker",
+        "Apache JMeter used for load testing"
+      ],
+      "expected_source": ["projects/flash-sale-engine.md"]
+    },
+    {
+      "id": "q02",
+      "category": "factual",
+      "expected_behavior": "answer",
+      "question": "Where does Mohit study and when does he graduate?",
+      "expected_key_facts": [
+        "Chandigarh University",
+        "Computer Science / Computer Science Engineering",
+        "graduating 2027",
+        "Bachelor of Engineering"
+      ],
+      "expected_source": ["about.md"]
+    },
+    {
+      "id": "q03",
+      "category": "factual",
+      "expected_behavior": "answer",
+      "question": "How can I contact Mohit?",
+      "expected_key_facts": [
+        "mohitk3001@gmail.com",
+        "LinkedIn linkedin.com/in/mohit-mahanta-027778290",
+        "GitHub github.com/MoX-creater"
+      ],
+      "expected_source": ["about.md"]
+    },
+    {
+      "id": "q04",
+      "category": "factual",
+      "expected_behavior": "answer",
+      "question": "What are Mohit's competitive programming stats?",
+      "expected_key_facts": [
+        "700+ LeetCode problems",
+        "LeetCode rating 1700 in Java",
+        "Codeforces rating 1000+"
+      ],
+      "expected_source": ["about.md", "skills.md", "faq.md"]
+    },
+    {
+      "id": "q05",
+      "category": "factual",
+      "expected_behavior": "answer",
+      "question": "What database does the Typing Speed App use?",
+      "expected_key_facts": [
+        "Firebase Firestore"
+      ],
+      "expected_source": ["projects/typing-speed-app.md", "skills.md"]
+    },
+    {
+      "id": "q06",
+      "category": "factual",
+      "expected_behavior": "answer",
+      "question": "Which languages is Mohit most comfortable with, and where has he used them?",
+      "expected_key_facts": [
+        "Java is primary for backend and DSA",
+        "Java used in Flash Sale Engine / Spring Boot",
+        "JavaScript used in DropLink and Typing Speed App",
+        "SQL used with PostgreSQL / Flash Sale Engine"
+      ],
+      "expected_source": ["skills.md"]
+    },
+    {
+      "id": "q07",
+      "category": "project_deep",
+      "expected_behavior": "answer",
+      "question": "What problem does DropLink solve?",
+      "expected_key_facts": [
+        "peer-to-peer / browser-to-browser file transfer",
+        "avoids storing files on a server",
+        "privacy: file data does not pass through a third-party server",
+        "avoids upload-then-download overhead"
+      ],
+      "expected_source": ["projects/droplink.md"]
+    },
+    {
+      "id": "q08",
+      "category": "project_deep",
+      "expected_behavior": "answer",
+      "question": "How does the Flash Sale Engine prevent inventory overselling under concurrent load?",
+      "expected_key_facts": [
+        "Redis for inventory / atomic decrement",
+        "Redisson distributed locks",
+        "RabbitMQ decouples persistence from the hot path",
+        "idempotent / unique request IDs for exactly-once processing",
+        "zero overselling claimed under load tests"
+      ],
+      "expected_source": ["projects/flash-sale-engine.md", "faq.md"]
+    },
+    {
+      "id": "q09",
+      "category": "project_deep",
+      "expected_behavior": "answer",
+      "question": "How does AI adaptation work in the Typing Speed App?",
+      "expected_key_facts": [
+        "collects error telemetry / weak characters or bigrams",
+        "Google Gemini generates adaptive passages",
+        "targets user-specific weaknesses",
+        "caching, rate limiting, or fallback passages"
+      ],
+      "expected_source": ["projects/typing-speed-app.md", "faq.md"]
+    },
+    {
+      "id": "q10",
+      "category": "project_deep",
+      "expected_behavior": "answer",
+      "question": "Why did you use RabbitMQ in the Flash Sale Engine?",
+      "expected_key_facts": [
+        "decouple inventory reservation from database writes",
+        "keep API latency low / under 50ms",
+        "PostgreSQL writes happen asynchronously via a consumer",
+        "avoid DB write bottleneck under high concurrency"
+      ],
+      "expected_source": ["projects/flash-sale-engine.md"]
+    },
+    {
+      "id": "q11",
+      "category": "project_deep",
+      "expected_behavior": "answer",
+      "question": "How does DropLink handle NAT traversal, and what went wrong in early testing?",
+      "expected_key_facts": [
+        "ICE candidates",
+        "STUN servers",
+        "discover public IP for peers behind NAT",
+        "initial failure when users were on different networks"
+      ],
+      "expected_source": ["projects/droplink.md"]
+    },
+    {
+      "id": "q12",
+      "category": "project_deep",
+      "expected_behavior": "answer",
+      "question": "What's your strongest project and why?",
+      "expected_key_facts": [
+        "Flash Sale Engine",
+        "high concurrency / overselling / distributed systems",
+        "Redis / Redisson / RabbitMQ mentioned as part of the rationale"
+      ],
+      "expected_source": ["faq.md", "projects/flash-sale-engine.md"]
+    },
+    {
+      "id": "q13",
+      "category": "out_of_scope",
+      "expected_behavior": "decline",
+      "question": "What's the capital of France?",
+      "expected_key_facts": [],
+      "expected_source": []
+    },
+    {
+      "id": "q14",
+      "category": "out_of_scope",
+      "expected_behavior": "decline",
+      "question": "What's Mohit's favorite food?",
+      "expected_key_facts": [],
+      "expected_source": []
+    },
+    {
+      "id": "q15",
+      "category": "out_of_scope",
+      "expected_behavior": "decline",
+      "question": "What's Mohit's current GPA?",
+      "expected_key_facts": [],
+      "expected_source": []
+    },
+    {
+      "id": "q16",
+      "category": "out_of_scope",
+      "expected_behavior": "decline",
+      "question": "Write a Python implementation of merge sort for my homework.",
+      "expected_key_facts": [],
+      "expected_source": []
+    },
+    {
+      "id": "q17",
+      "category": "ambiguous",
+      "expected_behavior": "answer",
+      "question": "Tell me about Mohit's experience.",
+      "expected_key_facts": [
+        "backend-focused CS student",
+        "Chandigarh University",
+        "mentions at least one of: Flash Sale Engine, DropLink, Typing Speed App",
+        "internship / SDE / backend roles"
+      ],
+      "expected_source": ["about.md", "faq.md", "skills.md"]
+    },
+    {
+      "id": "q18",
+      "category": "ambiguous",
+      "expected_behavior": "answer",
+      "question": "What projects has Mohit built?",
+      "expected_key_facts": [
+        "Flash Sale Engine",
+        "DropLink",
+        "Typing Speed App"
+      ],
+      "expected_source": ["about.md", "projects/flash-sale-engine.md", "projects/droplink.md", "projects/typing-speed-app.md", "faq.md"]
+    },
+    {
+      "id": "q19",
+      "category": "ambiguous",
+      "expected_behavior": "answer",
+      "question": "What's Mohit's tech stack?",
+      "expected_key_facts": [
+        "Java",
+        "Spring Boot",
+        "React",
+        "Redis",
+        "Node.js or Express"
+      ],
+      "expected_source": ["skills.md", "about.md"]
+    },
+    {
+      "id": "q20",
+      "category": "ambiguous",
+      "expected_behavior": "answer",
+      "question": "What kind of roles is Mohit targeting?",
+      "expected_key_facts": [
+        "internship not full-time as current focus",
+        "SDE and/or backend",
+        "distributed systems / high-concurrency / Spring Boot type work"
+      ],
+      "expected_source": ["about.md", "faq.md"]
+    }
+  ]
+}

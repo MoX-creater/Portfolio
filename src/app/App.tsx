@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, type ReactNode } from "react";
 import { Github, Linkedin, Mail, FileText, ExternalLink, Menu, X, ArrowUpRight } from "lucide-react";
 import { CustomCursor } from "./components/ui/CustomCursor";
+import { ChatWidget } from "./components/ChatWidget";
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -1301,6 +1302,8 @@ export default function App() {
           </div>
         </div>
       </footer>
+
+      <ChatWidget />
     </div>
   );
 }
