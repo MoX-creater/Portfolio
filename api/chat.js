@@ -40,6 +40,11 @@ const UNEXPECTED_FALLBACK =
 const INJECTION_FALLBACK =
   'That looks like an attempt to override the assistant. Ask about my projects, skills, or background instead.';
 
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
 // High-precision tripwire only — real isolation lives in generate.js (systemInstruction).
 const INJECTION_PATTERNS = [
   /ignore\s+(all\s+)?(previous|prior|above|earlier)\s+instructions/i,
@@ -72,7 +77,19 @@ const chatRateLimiter = rateLimit({
   },
 });
 
-router.use(cors());
+router.use(
+  cors({
+    origin: (origin, callback) => {
+      // Non-browser clients such as curl do not send an Origin header.
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+        return;
+      }
+
+      callback(new Error('Origin is not allowed by CORS'));
+    },
+  })
+);
 router.use(express.json());
 
 function clientIp(req) {
