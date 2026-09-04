@@ -9,6 +9,7 @@
  */
 
 import express from 'express';
+import cors from 'cors';
 import dotenv from 'dotenv';
 import chatRouter, { rateLimitMax, rateLimitWindowMs } from './chat.js';
 
@@ -55,6 +56,24 @@ console.log('='.repeat(70) + '\n');
 
 const app = express();
 const PORT = process.env.API_PORT || 3001;
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173')
+  .split(',')
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    // Non-browser clients such as curl do not send an Origin header.
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+      return;
+    }
+
+    callback(new Error('Origin is not allowed by CORS'));
+  },
+};
+
+console.log(`[startup] CORS allowed origins: ${JSON.stringify(allowedOrigins)}`);
 
 // Required so express-rate-limit keys on the real client IP behind
 // Cloudflare / a reverse proxy, not the proxy's address.
@@ -63,6 +82,11 @@ app.set('trust proxy', 1);
 // ============================================================================
 // Middleware
 // ============================================================================
+
+// CORS must run before body parsing, rate limiting, and routes so it handles
+// browser OPTIONS preflight requests before downstream middleware can respond.
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 
 // Parse JSON bodies (must be before routes)
 app.use(express.json());
