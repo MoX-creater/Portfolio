@@ -316,7 +316,7 @@ export function ChatWidget() {
           </div>
           
           {/* Messages Area */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          <div className="chat-widget-messages flex-1 overflow-y-auto p-4 space-y-4">
             {messages.length === 0 && (
               <div className="text-neutral-500 text-xs space-y-3">
                 <p className="text-green-400/80">// Welcome to the portfolio chatbot</p>

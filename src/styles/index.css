@@ -1,3 +1,29 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
+
+.chat-widget-messages {
+	box-sizing: border-box;
+	padding-right: 16px;
+	scrollbar-gutter: stable;
+	scrollbar-width: thin;
+	scrollbar-color: rgba(74, 222, 128, 0.45) rgba(10, 10, 10, 0.8);
+}
+
+.chat-widget-messages::-webkit-scrollbar {
+	width: 8px;
+}
+
+.chat-widget-messages::-webkit-scrollbar-track {
+	background: rgba(10, 10, 10, 0.8);
+}
+
+.chat-widget-messages::-webkit-scrollbar-thumb {
+	background: rgba(74, 222, 128, 0.45);
+	border: 2px solid rgba(10, 10, 10, 0.8);
+	border-radius: 999px;
+}
+
+.chat-widget-messages::-webkit-scrollbar-thumb:hover {
+	background: rgba(74, 222, 128, 0.7);
+}
