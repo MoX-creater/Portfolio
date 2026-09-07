@@ -134,6 +134,14 @@ function isRetryableGenerationError(error) {
   );
 }
 
+function isHighDemand503Error(error) {
+  const message = error?.message || '';
+  return (
+    (error?.status === 503 || message.includes('503')) &&
+    /high demand|overloaded|service unavailable/i.test(message)
+  );
+}
+
 function setupSSE(res) {
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
@@ -267,10 +275,39 @@ router.post('/chat', chatRateLimiter, async (req, res) => {
               `[chat.js] Transient API error, retrying in ${RETRY_DELAY_MS}ms (attempt ${attempt}/${MAX_RETRIES + 1})`
             );
             await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+          } else if (
+            isHighDemand503Error(error) &&
+            attempt > MAX_RETRIES &&
+            tokenCount === 0
+          ) {
+            console.log('[chat.js] Primary retries exhausted on a high-demand 503');
           } else {
             throw error;
           }
         }
+      }
+
+      if (!success && !isClientDisconnected && isHighDemand503Error(lastError)) {
+        console.log('[chat.js] Primary model exhausted after high-demand 503 errors; trying fallback model');
+        tokenCount = 0;
+
+        for await (const textChunk of generateStream(
+          trimmedQuery,
+          retrievedChunks,
+          process.env.FALLBACK_GENERATION_MODEL
+        )) {
+          tokenCount += 1;
+
+          if (isClientDisconnected) {
+            console.log('[chat.js] Client disconnected during fallback generation, stopping');
+            return;
+          }
+
+          sendSSE(res, 'token', { text: textChunk });
+        }
+
+        success = true;
+        console.log(`[chat.js] Fallback generation complete, tokens: ${tokenCount}`);
       }
 
       if (success && !isClientDisconnected) {

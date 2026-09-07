@@ -42,8 +42,18 @@ if (!process.env.GENERATION_MODEL) {
 }
 
 const GENERATION_MODEL = process.env.GENERATION_MODEL;
+const FALLBACK_GENERATION_MODEL = process.env.FALLBACK_GENERATION_MODEL;
+
+if (!FALLBACK_GENERATION_MODEL) {
+  throw new Error(
+    'FALLBACK_GENERATION_MODEL environment variable is not set. ' +
+    'Add a stable secondary Gemini model name to your .env file. ' +
+    'Example: FALLBACK_GENERATION_MODEL=models/gemini-3.5-flash-lite'
+  );
+}
 
 console.log(`[generate.js] Using generation model: ${GENERATION_MODEL}`);
+console.log(`[generate.js] Using fallback generation model: ${FALLBACK_GENERATION_MODEL}`);
 
 // ============================================================================
 // Google Gemini API Initialization
@@ -150,7 +160,7 @@ Answer using ONLY the information from the context above. Cite which source(s) y
  * - Server memory issues (each stream holds open a connection)
  * Solution: Implement request queuing or use a load balancer
  */
-export async function* generateStream(query, chunks) {
+export async function* generateStream(query, chunks, modelName = GENERATION_MODEL) {
   console.log('[generateStream] === FUNCTION CALLED ===');
   console.log('[generateStream] Query:', query);
   console.log('[generateStream] Chunks count:', chunks?.length);
@@ -175,9 +185,9 @@ export async function* generateStream(query, chunks) {
     console.log('[generateStream] User prompt length:', userPrompt.length);
     
     // Initialize model with safety settings
-    console.log('[generateStream] Initializing model:', GENERATION_MODEL);
+    console.log('[generateStream] Initializing model:', modelName);
     const model = genAI.getGenerativeModel({
-      model: GENERATION_MODEL,
+      model: modelName,
       systemInstruction: systemPrompt,
       safetySettings: [
         {
@@ -218,6 +228,9 @@ export async function* generateStream(query, chunks) {
     }
     
     console.log(`[generateStream] === STREAM COMPLETE === Total chunks: ${chunkCount}`);
+    if (modelName === FALLBACK_GENERATION_MODEL) {
+      console.log(`Generated using fallback model: ${modelName}`);
+    }
     
   } catch (error) {
     console.error('[generateStream] !!! ERROR CAUGHT !!!');

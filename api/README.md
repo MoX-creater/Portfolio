@@ -23,7 +23,8 @@ POST /api/chat  (chat.js)
     ├─→ 3. Generate  (generate.js)
     │     • build a system prompt scoped to the retrieved context
     │     • stream the response from Gemini
-    │     • retry once on transient (503) failures
+    │     • retry transient failures with the existing retry policy
+    │     • try the fallback model once after exhausted high-demand 503 failures
     │
     └─→ 4. Stream to client (SSE)
           • event: retrieval  — sources + similarity scores
@@ -179,12 +180,15 @@ The client only ever sees a generic, safe message here — the real error (e.g. 
 GOOGLE_API_KEY=your_api_key
 FIREBASE_PROJECT_ID=your_project_id
 GENERATION_MODEL=models/gemini-3.6-flash   # see note below
+FALLBACK_GENERATION_MODEL=models/gemini-3.5-flash-lite
 RATE_LIMIT_MAX=10
 RATE_LIMIT_WINDOW_MS=3600000
 ALLOWED_ORIGINS=https://portfolio1-7zp.pages.dev
 ```
 
 > **Why `GENERATION_MODEL` is an env var, not hardcoded:** during development, Gemini model names were deprecated and swapped out multiple times — a model that worked one day 404'd the next. Keeping this configurable means a deprecation is a Render dashboard change, not a redeploy.
+
+`FALLBACK_GENERATION_MODEL` is attempted once only when all primary retries fail with a high-demand 503. Set it to a stable, lower-demand model such as `models/gemini-3.5-flash-lite`, and configure the same variable in Render.
 
 **Tunable parameters:**
 - `retrieve.js` — `DEFAULT_TOP_K` (chunks retrieved per query), similarity threshold for filtering low-relevance matches
@@ -201,7 +205,7 @@ Works fine for the current knowledge base size (dozens of chunks). If the knowle
 Each open chat request holds a connection for the duration of generation. Fine at portfolio-site traffic levels; would need connection limits, load balancing, or a queue at meaningfully higher concurrency.
 
 **API quota**
-The backend retries transient (503) failures once, but a sustained spike in traffic could still hit Gemini's rate/quota limits — this happened during development from testing volume alone, not real traffic. Per-IP rate limiting (see `RATE_LIMIT_MAX`) is the current mitigation.
+The backend retries transient generation failures using the configured retry policy, then tries the fallback model once for exhausted high-demand 503 failures. A sustained spike in traffic could still hit Gemini's rate/quota limits — this happened during development from testing volume alone, not real traffic. Per-IP rate limiting (see `RATE_LIMIT_MAX`) is the current mitigation.
 
 **Stateless queries**
 Each request is independent — there's no conversation memory across turns. A follow-up question like "tell me more about that" has no prior context to resolve against. Adding session-based history would be the next step if multi-turn conversation mattered here.
