@@ -56,40 +56,41 @@ Second, successful reservations produce a lightweight message to a RabbitMQ exch
 Third, a consumer service reads from the queue, writes the finalized order to MySQL, and handles retries on failure. If the consumer is slow or restarts, messages queue up rather than being lost. Idempotency keys prevent double-processing on retry.
 
 The result: the checkout critical path is a Redis Lua call plus a queue publish — typically under 5ms end-to-end, with horizontal scalability bounded only by Redis throughput.`,
-    github: "https://github.com/MoX-creater/Flash-Sale-Concurrency-App", 
+    github: "https://github.com/MoX-creater/Flash-Sale-Concurrency-App",
   },
   {
-  name: "Typing Speed Web App",
-  tagline: "Real-time multiplayer typing platform with live WPM tracking, AI-adaptive passages, and AI performance summaries",
-  stack: ["React", "Node.js", "Express", "Firebase/Firestore", "Google Gemini API", "Socket.io"],
-  problem:
-    "Needed a responsive typing platform supporting real-time multiplayer races without input lag, alongside AI-personalized passage generation and performance feedback based on per-user typing error data.",
-  role:
-    "Architected and built the full stack — RESTful APIs for session, scoring, and user data management; real-time multiplayer race rooms via Socket.io; and AI-powered features (adaptive passage generation, performance summaries) using Google Gemini.",
-  decisions: [
-    {
-      label: "Optimized rendering pipeline",
-      reason:
-        "Tuned React state updates and rendering to minimize input lag during continuous typing, keeping response latency under 150ms in local testing.",
-    },
-    {
-      label: "Real-time multiplayer architecture",
-      reason:
-        "Built Socket.io-based race rooms (create/join/leave) with client-side result handling matching the solo-test pattern, validated on a single server instance without requiring Redis/RabbitMQ scaling.",
-    },
-    {
-      label: "AI-personalized passage generation",
-      reason:
-        "Captured per-user typing error telemetry (error maps, WPM over time, accuracy by character class) and fed it to Gemini to generate adaptive-difficulty passages, plus AI-generated post-race and post-test performance summaries.",
-    },
-    {
-      label: "Production hardening for AI endpoints",
-      reason:
-        "Added passage caching/reuse, rate limiting, and edge-case handling for new users with no typing profile yet, before merging the feature branch to main.",
-    },
-  ],
-  github: "https://github.com/MoX-creater/Typing-Speed-Website",
-},
+    name: "Typing Speed Web App",
+    tagline: "Real-time multiplayer typing platform with live WPM tracking, AI-adaptive passages, and AI performance summaries",
+    stack: ["React", "Node.js", "Express", "Firebase/Firestore", "Google Gemini API", "Socket.io"],
+    problem:
+      "Needed a responsive typing platform supporting real-time multiplayer races without input lag, alongside AI-personalized passage generation and performance feedback based on per-user typing error data.",
+    role:
+      "Architected and built the full stack — RESTful APIs for session, scoring, and user data management; real-time multiplayer race rooms via Socket.io; and AI-powered features (adaptive passage generation, performance summaries) using Google Gemini.",
+    decisions: [
+      {
+        label: "Optimized rendering pipeline",
+        reason:
+          "Tuned React state updates and rendering to minimize input lag during continuous typing, keeping response latency under 150ms in local testing.",
+      },
+      {
+        label: "Real-time multiplayer architecture",
+        reason:
+          "Built Socket.io-based race rooms (create/join/leave) with client-side result handling matching the solo-test pattern, validated on a single server instance without requiring Redis/RabbitMQ scaling.",
+      },
+      {
+        label: "AI-personalized passage generation",
+        reason:
+          "Captured per-user typing error telemetry (error maps, WPM over time, accuracy by character class) and fed it to Gemini to generate adaptive-difficulty passages, plus AI-generated post-race and post-test performance summaries.",
+      },
+      {
+        label: "Production hardening for AI endpoints",
+        reason:
+          "Added passage caching/reuse, rate limiting, and edge-case handling for new users with no typing profile yet, before merging the feature branch to main.",
+      },
+    ],
+    github: "https://github.com/MoX-creater/Typing-Speed-Website",
+    demo: "https://typing-speed-website-lac.vercel.app/",
+  },
   {
     name: "P2P File Sharing App",
     tagline: "Peer-to-peer file transfer using direct browser-to-browser connections",
@@ -110,19 +111,48 @@ The result: the checkout critical path is a Redis Lua call plus a queue publish 
           "Used to handle NAT traversal and network variability, achieving transfer speeds up to 2–8 MB/s in favorable local conditions.",
       },
     ],
-    github: "https://github.com/MoX-creater/DropLink-P2P-file-sharing", 
+    github: "https://github.com/MoX-creater/DropLink-P2P-file-sharing",
+    demo: "https://drop-link-p2-p-file-sharing-client.vercel.app/"
+  },
+  {
+    name: "Olist Analytics Pipeline",
+    tagline: "End-to-end data engineering and analytics pipeline for Brazilian e-commerce dataset",
+    stack: ["Node.js", "PostgreSQL", "dbt", "Express", "React", "Recharts", "GitHub Actions"],
+    problem:
+      "Needed to build an end-to-end data pipeline to ingest, transform, and visualize the Olist e-commerce dataset, while working within free-tier deployment limits.",
+    role:
+      "Built the complete pipeline: a Node.js script for raw CSV ingestion into PostgreSQL, dbt for data transformation (staging to marts), and a custom Express/React dashboard.",
+    decisions: [
+      {
+        label: "Custom React/Recharts Dashboard",
+        reason:
+          "Pivoted off Metabase due to free-tier RAM caps (512MB) on Render/Koyeb, building a lightweight custom Express API and React dashboard instead.",
+      },
+      {
+        label: "dbt for Data Transformation",
+        reason:
+          "Utilized dbt for structured transformation (staging, intermediate, marts layers) and deployed dbt docs as a static site on Vercel.",
+      },
+      {
+        label: "Automated dbt Runs",
+        reason:
+          "Configured GitHub Actions to automatically run dbt models against the hosted PostgreSQL database.",
+      },
+    ],
+    github: "https://github.com/MoX-creater/Olist-E-commerce-Analytics-dbt",
+    demo: "https://olist-e-commerce-analytics-dbt.vercel.app/",
   },
 ];
 
 // Each entry is [category, primary tags, optional secondary tags]
 const SKILLS: [string, string[], string[]?][] = [
-  ["Languages",    ["Java", "JavaScript", "SQL"]],
-  ["Backend",      ["Spring Boot", "Node.js", "Express", "REST APIs"]],
-  ["Data & Infra", ["Redis", "RabbitMQ", "MongoDB", "MySQL", "Docker"]],
-  ["Frontend",     ["React", "HTML/CSS"]],
-  ["Tools",        ["Git", "GitHub", "Docker", "VS Code"]],
-  ["Core Java",    ["OOP", "Collections Framework", "Exception Handling", "Multithreading", "Java 8 Streams"],
-                   ["DSA", "Problem Solving", "Object-Oriented Design"]],
+  ["Languages", ["Java", "JavaScript", "SQL"]],
+  ["Backend", ["Spring Boot", "Node.js", "Express", "REST APIs"]],
+  ["Data & Infra", ["Redis", "RabbitMQ", "MongoDB", "MySQL", "Docker", "PostgreSQL", "dbt"]],
+  ["Frontend", ["React", "HTML/CSS", "Recharts"]],
+  ["Tools", ["Git", "GitHub", "Docker", "VS Code"]],
+  ["Core Java", ["OOP", "Collections Framework", "Exception Handling", "Multithreading", "Java 8 Streams"],
+    ["DSA", "Problem Solving", "Object-Oriented Design"]],
 ];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -481,15 +511,15 @@ const MONO = "'JetBrains Mono', 'Fira Code', monospace";
 
 // VS Code Dark+ palette for JS/Node.js
 const C = {
-  keyword:  "#C792EA", // const, async, await, return — purple
-  method:   "#82AAFF", // function / method names — blue
-  string:   "#C3E88D", // string literals — green
-  comment:  "#546E7A", // // comments — slate
-  plain:    "#D4D4D4", // default text — near-white
-  param:    "#f07178", // parameter / variable names — coral
-  brace:    "#89DDFF", // punctuation & brackets — cyan
-  number:   "#F78C6C", // numeric literals — orange
-  builtin:  "#FFCB6B", // req, res, router — amber
+  keyword: "#C792EA", // const, async, await, return — purple
+  method: "#82AAFF", // function / method names — blue
+  string: "#C3E88D", // string literals — green
+  comment: "#546E7A", // // comments — slate
+  plain: "#D4D4D4", // default text — near-white
+  param: "#f07178", // parameter / variable names — coral
+  brace: "#89DDFF", // punctuation & brackets — cyan
+  number: "#F78C6C", // numeric literals — orange
+  builtin: "#FFCB6B", // req, res, router — amber
 };
 
 const CODE_LINES: Line[] = [
@@ -1248,7 +1278,7 @@ export default function App() {
                 className="inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors text-lg font-medium"
                 style={{ fontFamily: "'Bricolage Grotesque', sans-serif" }}
               >
-                mohitk3001@gmail.com {}
+                mohitk3001@gmail.com { }
                 <ArrowUpRight size={18} />
               </a>
             </div>
